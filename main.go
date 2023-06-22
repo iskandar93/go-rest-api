@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"io/ioutil"
+	"encoding/json"
 	
 	"github.com/gorilla/mux"
-	"io/ioutil"
 )
 
 // Make a dummy database
@@ -29,9 +30,12 @@ var events = allEvents {
 // Creating an event
 func createEvent(w http.ResponseWriter, r *http.Request) {
 	var newEvent event
+	fmt.Println(newEvent)
 	reqBody, err := ioutil.ReadAll(r.Body)
-	if err!= nil {
+	if err != nil {
 		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
+		// http.Error(w, "Error reading request body", http.StatusBadRequest)
+		// return
 	}
 
 	json.Unmarshal(reqBody, &newEvent)
@@ -48,5 +52,6 @@ func homeLink(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeLink)
+	router.HandleFunc("/event", createEvent).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
