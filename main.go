@@ -19,13 +19,30 @@ type event struct {
 
 type allEvents []event
 
-var events = allEvents {
-	{
-		ID: "1",
-		Title: "Introduction to Golang",
-		Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
-	},
+var events = allEvents {}
+
+func initEvents() {
+	events = allEvents {
+		{
+			ID: "1",
+			Title: "Introduction to Golang",
+			Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
+		},
+		{
+			ID:          "2",
+			Title:       "Advanced Web Development",
+			Description: "Join us for an in-depth exploration of advanced web development techniques",
+		},
+	}
 }
+
+// var events = allEvents {
+// 	{
+// 		ID: "1",
+// 		Title: "Introduction to Golang",
+// 		Description: "Come join us for a chance to learn how golang works and get to eventually try it out",
+// 	},
+// }
 
 // Creating an event
 func createEvent(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +78,7 @@ func getAllEvents(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(events)
 }
 
+// Update event
 func updateEvent(w http.ResponseWriter, r *http.Request) {
 	eventID := mux.Vars(r)["id"]
 	var updatedEvent event
@@ -82,17 +100,30 @@ func updateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func deleteEvent(w http.ResponseWriter, r *http.Request) {
+	eventID := mux.Vars(r)["id"]
+
+	for i, singleEvent := range events {
+		if singleEvent.ID == eventID {
+			events = append(events[:i], events[i+1:]...)
+			fmt.Fprintf(w, "The event with ID %v has been deleted successfully", eventID)
+		}
+	}
+}
+
 func homeLink(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome home!")
 }
 
 func main() {
 	initEvents()
+
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/event", createEvent).Methods("POST")
-	router.HandleFunc("events", getAllEvents).Methods("GET")
+	router.HandleFunc("/events", getAllEvents).Methods("GET")
 	router.HandleFunc("/event/{id}", getOneEvent).Methods("GET")
 	router.HandleFunc("/event/{id}", updateEvent).Methods("PATCH")
+	router.HandleFunc("/events/{id}", deleteEvent).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
