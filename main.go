@@ -56,6 +56,11 @@ func getOneEvent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Gather all events
+func getAllEvents(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(events)
+}
+
 func homeLink(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome home!")
 }
@@ -65,5 +70,6 @@ func main() {
 	router.HandleFunc("/", homeLink)
 	router.HandleFunc("/event", createEvent).Methods("POST")
 	router.HandleFunc("/event/{id}", getOneEvent).Methods("GET")
+	router.HandleFunc("event/all", getAllEvents).Methods("GET")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
